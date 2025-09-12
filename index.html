@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriAssist - Smart Farming Solutions</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://unpkg.com/i18next@22.4.14/dist/umd/i18next.min.js"></script>
+</head>
+<body>
+
+<header>
+  <h1 data-i18n="app_name">AgriAssist</h1>
+  <nav>
+    <a href="#features" data-i18n="services">Services</a>
+    <a href="#chatSection" data-i18n="chat">Chat</a>
+    <a href="#contact" data-i18n="contact">Contact</a>
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+      <option value="ml">മലയാളം</option>
+    </select>
+  </nav>
+</header>
+
+<section class="hero">
+  <h2 data-i18n="hero_title">Smart Farming Solutions for Kerala Agriculture</h2>
+  <p data-i18n="hero_subtitle">Get expert advice on Kerala crops, monsoon farming, coconut, rubber, spices and traditional farming methods</p>
+  <button class="btn" onclick="scrollToChat()" data-i18n="get_started">Get Started</button>
+</section>
+
+<section id="features" class="features">
+  <h2 data-i18n="features_title">Our Services</h2>
+  <div class="feature-grid">
+    <div class="feature">
+      <i class="fas fa-seedling fa-2x"></i>
+      <h3 data-i18n="crop_identification">Kerala Crop Disease Identification</h3>
+      <p data-i18n="crop_identification_desc">Upload images of coconut, rubber, spices, and other Kerala crops for disease identification</p>
+    </div>
+    <div class="feature">
+      <i class="fas fa-cloud-rain fa-2x"></i>
+      <h3 data-i18n="monsoon_advice">Monsoon Farming Advice</h3>
+      <p data-i18n="monsoon_advice_desc">Get farming recommendations for Kerala's monsoon seasons</p>
+    </div>
+    <div class="feature">
+      <i class="fas fa-leaf fa-2x"></i>
+      <h3 data-i18n="spice_cultivation">Spice Cultivation</h3>
+      <p data-i18n="spice_cultivation_desc">Expert guidance on pepper, cardamom, cinnamon, and other Kerala spices</p>
+    </div>
+    <div class="feature">
+      <i class="fas fa-chart-line fa-2x"></i>
+      <h3 data-i18n="market_prices">Kerala Market Prices</h3>
+      <p data-i18n="market_prices_desc">Stay updated with Kerala agricultural market prices</p>
+    </div>
+    <div class="feature" onclick="showContactsModal()">
+      <i class="fas fa-address-book fa-2x"></i>
+      <h3 data-i18n="office_contacts">Kerala Agriculture Office Contacts</h3>
+      <p data-i18n="office_contacts_desc">Find contact information of Kerala agricultural officers in all districts</p>
+    </div>
+  </div>
+</section>
+
+<section id="chatSection" class="chat-section">
+  <h2 data-i18n="chat_title">Ask Our Kerala Agricultural Expert</h2>
+  <div class="chat-box" id="chat-box">
+    <div class="language-selector">
+      <label data-i18n="response_language">Response Language:</label>
+      <select id="responseLanguageSelect">
+        <option value="en" data-i18n="english">English</option>
+        <option value="hi" data-i18n="hindi">हिंदी</option>
+        <option value="ml" data-i18n="malayalam">മലയാളം</option>
+      </select>
+    </div>
+    <div class="messages" id="chatMessages">
+      <div class="message bot" data-i18n="welcome_message">
+        Hello! I'm your Kerala Agricultural AI Assistant. I specialize in Kerala farming - coconut, rubber, spices, rice, and traditional Kerala agricultural practices. Ask about crops, diseases, monsoon farming, or upload crop images for analysis.
+      </div>
+    </div>
+    <div class="chat-input-container">
+      <div id="imagePreview"></div>
+      <div class="chat-input">
+        <div class="file-input-wrapper">
+          <input type="file" id="imageInput" accept="image/*">
+          <button class="file-input-btn" onclick="document.getElementById('imageInput').click()">
+            <i class="fas fa-camera"></i>
+          </button>
+        </div>
+        <input type="text" id="user-input" data-i18n-placeholder="message_placeholder" placeholder="Ask about Kerala farming...">
+        <button id="sendButton" data-i18n="send">Send</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="contactsModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeContactsModal()">&times;</span>
+    <h2 data-i18n="kerala_agri_contacts">Kerala Agriculture Office Contacts</h2>
+    <div class="district-selector">
+      <label data-i18n="select_district">Select District:</label>
+      <select id="districtSelect" onchange="updateDistrictContacts()">
+        <option value="" data-i18n="all_districts">All Districts</option>
+        <option value="Alappuzha">Alappuzha</option>
+        <option value="Ernakulam">Ernakulam</option>
+        <option value="Idukki">Idukki</option>
+        <option value="Kannur">Kannur</option>
+        <option value="Kasaragod">Kasaragod</option>
+        <option value="Kollam">Kollam</option>
+        <option value="Kottayam">Kottayam</option>
+        <option value="Kozhikode">Kozhikode</option>
+        <option value="Malappuram">Malappuram</option>
+        <option value="Palakkad">Palakkad</option>
+        <option value="Pathanamthitta">Pathanamthitta</option>
+        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+        <option value="Thrissur">Thrissur</option>
+        <option value="Wayanad">Wayanad</option>
+      </select>
+    </div>
+    <div id="contactsContainer"></div>
+  </div>
+</div>
+
+<footer id="contact">
+  <p>&copy; 2025 AgriAssist Kerala. <span data-i18n="all_rights">All rights reserved.</span></p>
+</footer>
+
+<script src="contacts.js"></script>
+<script src="translations.js"></script>
+<script src="chat.js"></script>
+</body>
+</html>
