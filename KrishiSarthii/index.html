@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title">Krishi Sarthi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai@0.2.1/dist/index.umd.js"></script>
+    <style>
+        /* Pulsing animation for mic icon when recording */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .recording {
+            animation: pulse 1s infinite;
+            color: #ff0000; /* Red when recording */
+        }
+        /* Modal-specific styles */
+        body.modal-open {
+            overflow: hidden;
+        }
+        #contactsModal, #schemesModal {
+            transition: all 0.3s ease;
+        }
+        #contactsContainer, #schemesContainer {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .district-section table, .scheme-section {
+            width: 100%;
+            table-layout: auto;
+        }
+        @media (max-width: 640px) {
+            .district-section table {
+                min-width: 600px; /* Ensures horizontal scroll on mobile */
+            }
+        }
+    </style>
+</head>
+<body class="text-white bg-white">
+    <!-- Sticky Navbar -->
+    <header class="sticky top-0 z-50 bg-white shadow text-black">
+        <nav class="flex justify-between px-5 py-2 items-center">
+            <!-- Logo + Heading -->
+            <div class="flex items-center space-x-3">
+                <a href="index.html">
+                    <img class="w-5 md:w-16" src="images/logo.png" alt="Logo">
+                </a>
+                <h1 class="text-xl md:text-2xl text-green-900 font-bold" data-i18n="title">Krishi Sarthi</h1>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-2 font-medium">
+                <a class="text-green-800 hover:bg-slate-200 rounded-md px-2 py-1" href="index.html" data-i18n="home">Home</a>
+                <a class="text-green-800 hover:bg-slate-200 rounded-md px-2 py-1" href="#services" data-i18n="schemes">Schemes</a>
+                <a class="text-green-800 hover:bg-slate-200 rounded-md px-2 py-1" href="#services" data-i18n="crop_advisory">Crop Advisory</a>
+                <a class="text-green-800 hover:bg-slate-200 rounded-md px-2 py-1" href="#services" data-i18n="market_prices">Market Prices</a>
+                <a class="text-green-800 hover:bg-slate-200 rounded-md px-2 py-1" href="#services" data-i18n="weather">Weather</a>
+                <a class="text-green-800 hover:bg-slate-200 rounded-md px-2 py-1" href="#contact" data-i18n="contact">Contact Us</a>
+                <select id="languageSelect" class="bg-green-500 text-white rounded-lg px-2 py-1 text-sm">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="ml">മലയാളം</option>
+                </select>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button id="menu-btn" class="focus:outline-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden px-5 pb-4">
+            <a href="index.html" class="block py-2 text-green-800" data-i18n="home">Home</a>
+            <a href="#services" class="block py-2 text-green-800" data-i18n="schemes">Schemes</a>
+            <a href="#services" class="block py-2 text-green-800" data-i18n="crop_advisory">Crop Advisory</a>
+            <a href="#services" class="block py-2 text-green-800" data-i18n="market_prices">Market Prices</a>
+            <a href="#services" class="block py-2 text-green-800" data-i18n="weather">Weather</a>
+            <a href="#contact" class="block py-2 text-green-800" data-i18n="contact">Contact Us</a>
+        </div>
+    </header>
+
+    <!-- Full-Page Image Section -->
+    <section class="relative w-full h-[80vh] sm:h-screen overflow-hidden flex items-center">
+        <img src="images/sunrise3.jpg" alt="Hero Image" class="absolute inset-0 w-full h-full object-cover" />
+        <div class="relative z-10 ml-4 sm:ml-12 max-w-full sm:max-w-[33rem] flex flex-col justify-center h-full" data-aos="fade-up">
+            <h1 class="text-2xl sm:text-5xl text-white font-extrabold mx-4 sm:mx-20" data-i18n="hero_title1">Your Personal,</h1>
+            <h1 class="text-2xl py-2 sm:text-5xl font-extrabold mx-4 sm:mx-20 text-white" data-i18n="hero_title2">Digital Krishi Officer</h1>
+            <p class="mt-6 sm:mt-12 mx-2 sm:mx-12 text-white text-base sm:text-lg" data-i18n="hero_sub">
+                — always available, always learning, and always farmer-first.
+            </p>
+            <div class="text-center mt-10 sm:mt-24 mb-10">
+                <a href="#"><button class="font-semibold bg-red-500 border-red-700 rounded-full px-7 py-1.5 text-white hover:bg-red-700" data-i18n="explore">≫ Explore Now</button></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="bg-slate-200 w-full py-16 px-4 sm:px-12" data-aos="fade-down">
+        <h2 class="text-2xl sm:text-3xl text-green-900 font-bold text-center mb-12" data-i18n="services">Services</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div id="schemes-trigger" class="flex flex-col sm:flex-row items-center sm:items-start bg-white rounded-xl shadow p-6 hover:shadow-lg transition cursor-pointer">
+                <img src="https://tse4.mm.bing.net/th/id/OIP.dMZwCs6jGx4ZtYYQkSKpoAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Govt Schemes" class="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-4 sm:mb-0 sm:mr-6">
+                <div class="text-center sm:text-left">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900" data-i18n="govt_schemes">Govt Schemes</h3>
+                    <p class="text-gray-600 text-sm sm:text-base mt-2" data-i18n="govt_desc">
+                        Stay updated on latest farmer welfare programs.
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center sm:items-start bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+                <img src="https://static.vecteezy.com/system/resources/thumbnails/023/985/111/small_2x/3d-stock-market-statistic-illustration-free-png.png" alt="Market Prices" class="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-4 sm:mb-0 sm:mr-6">
+                <div class="text-center sm:text-left">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900" data-i18n="market_prices">Market Prices</h3>
+                    <p class="text-gray-600 text-sm sm:text-base mt-2" data-i18n="market_desc">
+                        Check mandi rates for your crops daily.
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center sm:items-start bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+                <img src="https://cdn-icons-png.flaticon.com/512/7477/7477793.png" alt="Weather Alerts" class="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-4 sm:mb-0 sm:mr-6">
+                <div class="text-center sm:text-left">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900" data-i18n="weather_alerts">Weather Alerts</h3>
+                    <p class="text-gray-600 text-sm sm:text-base mt-2" data-i18n="weather_desc">
+                        Get local climate & rainfall predictions.
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center sm:items-start bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+                <img src="https://png.pngtree.com/png-clipart/20211212/original/pngtree-agricultural-logo-design-png-image_6962123.png" alt="Crop Advisory" class="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-4 sm:mb-0 sm:mr-6">
+                <div class="text-center sm:text-left">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900" data-i18n="crop_advisory">Crop Advisory</h3>
+                    <p class="text-gray-600 text-sm sm:text-base mt-2" data-i18n="crop_desc">
+                        Get expert guidance for better yield and soil health.
+                    </p>
+                </div>
+            </div>
+            <div id="offices-trigger" class="flex flex-col sm:flex-row items-center sm:items-start bg-white rounded-xl shadow p-6 hover:shadow-lg transition cursor-pointer">
+                <img src="https://w7.pngwing.com/pngs/899/688/png-transparent-chat-manager-message-and-communication-sets-icon.png" alt="Contact Us" class="w-16 h-16 sm:w-20 sm:h-20 object-contain mb-4 sm:mb-0 sm:mr-6">
+                <div class="text-center sm:text-left">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900" data-i18n="kerala_offices">Kerala Agriculture Offices</h3>
+                    <p class="text-gray-600 text-sm sm:text-base mt-2" data-i18n="offices_desc">
+                        Find contact information of Kerala agricultural officers in all districts.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for Agricultural Office Contacts -->
+    <div id="contactsModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 hidden flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-green-900" data-i18n="kerala_offices">Kerala Agriculture Offices</h2>
+                <span class="close-modal text-gray-500 text-2xl cursor-pointer hover:text-black" onclick="closeContactsModal()">&times;</span>
+            </div>
+            <div class="p-4 flex-1">
+                <select id="districtSelect" class="bg-green-500 text-white rounded-lg px-2 py-1 mb-4 w-full sm:w-auto" onchange="updateDistrictContacts()">
+                    <option value="">All Districts</option>
+                    <option value="Alappuzha">Alappuzha</option>
+                    <option value="Ernakulam">Ernakulam</option>
+                    <option value="Idukki">Idukki</option>
+                    <option value="Kannur">Kannur</option>
+                    <option value="Kasaragod">Kasaragod</option>
+                    <option value="Kollam">Kollam</option>
+                    <option value="Kottayam">Kottayam</option>
+                    <option value="Kozhikode">Kozhikode</option>
+                    <option value="Malappuram">Malappuram</option>
+                    <option value="Palakkad">Palakkad</option>
+                    <option value="Pathanamthitta">Pathanamthitta</option>
+                    <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                    <option value="Thrissur">Thrissur</option>
+                    <option value="Wayanad">Wayanad</option>
+                </select>
+                <div id="contactsContainer" class="space-y-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Government Schemes -->
+    <div id="schemesModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 hidden flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-green-900" data-i18n="govt_schemes">Government Schemes</h2>
+                <span class="close-modal text-gray-500 text-2xl cursor-pointer hover:text-black" onclick="closeSchemesModal()">&times;</span>
+            </div>
+            <div class="p-4 flex-1">
+                <select id="schemeCategory" class="bg-green-500 text-white rounded-lg px-2 py-1 mb-4 w-full sm:w-auto">
+                    <option value="">All Schemes</option>
+                    <option value="State-Level">State-Level</option>
+                </select>
+                <div id="schemesContainer" class="space-y-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Section -->
+    <section id="assistant" class="bg-slate-300 flex flex-col items-center justify-center min-h-screen px-4 pb-20" data-aos="fade-up">
+        <h1 class="text-2xl sm:text-3xl text-green-900 font-bold text-center mb-10 mt-10" data-i18n="ai_title">
+            Your AI Digital Krishi Officer
+        </h1>
+        <div class="w-full max-w-3xl bg-white rounded-xl shadow-lg flex flex-col h-[90vh] border border-gray-200">
+            <div class="flex items-center justify-between bg-green-600 text-white px-4 py-3 rounded-t-xl">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🤖</span>
+                    <div>
+                        <h1 class="font-bold" data-i18n="ai_header">AI Assistant</h1>
+                        <p class="text-sm opacity-80" data-i18n="ai_powered">Powered by Advanced AI</p>
+                    </div>
+                </div>
+                <select id="chatLanguageSelect" class="bg-green-500 text-white rounded-lg px-2 py-1 text-sm">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="ml">മലയാളം</option>
+                </select>
+            </div>
+            <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
+                <div class="flex items-start gap-2">
+                    <span class="text-2xl">🤖</span>
+                    <div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-xs" data-i18n="ai_hello">
+                        Hello! I'm your Agricultural AI Assistant. I specialize in Kerala farming - coconut, rubber, spices, rice, and traditional Kerala agricultural practices. Ask about crops, diseases, monsoon farming, or upload crop images for analysis.
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 border-t border-gray-200 p-3">
+                <label class="cursor-pointer">
+                    <input type="file" class="hidden" id="imageUpload" accept="image/*">
+                    <span class="text-2xl">📷</span>
+                </label>
+                <div id="imagePreview" class="hidden ml-2">
+                    <img id="previewImg" class="w-12 h-12 object-cover rounded" alt="Preview">
+                </div>
+                <input id="userInput" type="text" placeholder="Type your message here..."
+                    class="flex-1 border border-gray-300 rounded-full px-4 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    style="color: #1f2937; background-color: #ffffff;" data-i18n-placeholder="type_message">
+                <button id="voiceBtn" class="bg-green-500 text-white rounded-full p-3 text-xl">🎤</button>
+                <button id="sendBtn" class="bg-green-600 text-white rounded-full p-3 text-xl">➤</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="bg-slate-200 w-full py-16 px-4 sm:px-12" data-aos="fade-up">
+        <h2 class="text-2xl sm:text-3xl text-green-900 font-bold text-center mb-10" data-i18n="contact_title">📩 Contact Us</h2>
+        <div class="flex flex-col lg:flex-row items-center justify-center gap-20">
+            <img class="hidden lg:block h-[550px] rounded-md shadow-s mr-10" src="https://i.pinimg.com/736x/14/78/5d/14785d680bdbf8bb283e93b1f37c433f.jpg" alt="Contact Illustration">
+            <div class="w-full max-w-lg bg-white p-8 rounded-xl shadow-lg">
+                <h3 class="font-extrabold text-2xl text-green-900 mb-6 text-center" data-i18n="contact_h3">We'd love to hear from you!</h3>
+                <div class="mb-4">
+                    <label for="name" class="block text-lg font-semibold text-gray-700 mb-2" data-i18n="name">Name</label>
+                    <input type="text" id="name" placeholder="Enter your Name"
+                        class="w-full px-4 py-2 text-gray-800 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        required />
+                </div>
+                <div class="mb-4">
+                    <label for="email" class="block text-lg font-semibold text-gray-700 mb-2" data-i18n="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your Email"
+                        class="w-full px-4 py-2 text-gray-800 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        required />
+                </div>
+                <div class="mb-4">
+                    <label for="feedback" class="block text-lg font-semibold text-gray-700 mb-2" data-i18n="feedback">Feedback</label>
+                    <textarea id="feedback" placeholder="Enter your feedback"
+                        class="w-full px-4 py-2 text-gray-800 rounded-md border border-gray-300 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+                        required></textarea>
+                </div>
+                <div class="text-center">
+                    <button type="submit" data-i18n="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md transition duration-300">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="w-full flex flex-col sm:flex-row justify-evenly p-6 bg-slate-900 animate-fade-in sm:gap-0" data-aos="fade-down">
+        <div class="p-4">
+            <h2 class="text-lg sm:text-xl text-green-500 font-extrabold mb-2" data-i18n="footer_home">Home</h2>
+            <ul class="text-white mt-3 mx-2 space-y-1">
+                <li data-i18n="about">About</li>
+                <li data-i18n="contact_us">Contact us</li>
+            </ul>
+        </div>
+        <div class="p-4">
+            <h2 class="text-lg sm:text-xl text-green-500 font-extrabold mb-2" data-i18n="faqs">FAQs</h2>
+            <ul class="text-white mt-3 mx-2 space-y-1">
+                <li data-i18n="security">Security</li>
+                <li data-i18n="help">Help</li>
+            </ul>
+        </div>
+        <div class="p-4">
+            <h2 class="text-lg sm:text-xl text-green-500 font-extrabold mb-2" data-i18n="privacy_policy">Privacy Policy</h2>
+            <ul class="text-white mt-3 mx-2 space-y-1">
+                <li data-i18n="privacy">Privacy</li>
+                <li data-i18n="community">Community</li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="translation.js"></script>
+    <script src="contact.js"></script>
+    <script src="chat.js"></script>
+    <script src="src/js/auth-ui.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+        // Mobile menu toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Language change functionality
+        setLanguage('en'); // Initial load
+        document.getElementById('languageSelect').addEventListener('change', function(e) {
+            setLanguage(e.target.value);
+            document.getElementById('chatLanguageSelect').value = e.target.value;
+        });
+        document.getElementById('chatLanguageSelect').addEventListener('change', function(e) {
+            setLanguage(e.target.value);
+            document.getElementById('languageSelect').value = e.target.value;
+        });
+
+        // Schemes and Contacts data
+
+    </script>
+</body>
+</html>
